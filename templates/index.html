@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div id="calculator">
+        <input type="text" id="display" disabled placeholder="0">
+
+        <div class="buttons">
+            <button onclick="appendNumber(7)">7</button>
+            <button onclick="appendNumber(8)">8</button>
+            <button onclick="appendNumber(9)">9</button>
+            <button onclick="setOperation('divide')">÷</button>
+
+            <button onclick="appendNumber(4)">4</button>
+            <button onclick="appendNumber(5)">5</button>
+            <button onclick="appendNumber(6)">6</button>
+            <button onclick="setOperation('multiply')">×</button>
+
+            <button onclick="appendNumber(1)">1</button>
+            <button onclick="appendNumber(2)">2</button>
+            <button onclick="appendNumber(3)">3</button>
+            <button onclick="setOperation('subtract')">-</button>
+
+            <button onclick="appendNumber(0)">0</button>
+            <button onclick="clearDisplay()">C</button>
+            <button onclick="calculate()">=</button>
+            <button onclick="setOperation('add')">+</button>
+        </div>
+    </div>
+
+    <script>
+        let currentNumber = '';
+        let operation = null;
+        let previousNumber = '';
+
+        function appendNumber(num) {
+            currentNumber += num;
+            document.getElementById('display').value = currentNumber;
+        }
+
+        function setOperation(op) {
+            if (currentNumber) {
+                previousNumber = currentNumber;
+                currentNumber = '';
+                operation = op;
+            }
+        }
+
+        function clearDisplay() {
+            currentNumber = '';
+            previousNumber = '';
+            operation = null;
+            document.getElementById('display').value = '';
+        }
+
+        async function calculate() {
+            if (operation && previousNumber && currentNumber) {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        num1: parseFloat(previousNumber),
+                        num2: parseFloat(currentNumber),
+                        operation: operation
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('display').value = data.result;
+                currentNumber = data.result;
+                previousNumber = '';
+                operation = null;
+            }
+        }
+    </script>
+</body>
+</html>
